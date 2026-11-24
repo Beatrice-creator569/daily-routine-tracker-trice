@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Daily Routine</title>
+
+  <style>
+    /* These styles control how the page looks */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6f4;
+      color: #24332b;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #247a50;
+    }
+
+    .routine-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px #00000015;
+    }
+
+    form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 6px;
+      background: #247a50;
+      color: white;
+      cursor: pointer;
+    }
+
+    #reset-button {
+      background: #68736c;
+      margin-top: 12px;
+    }
+
+    li {
+      margin: 12px 0;
+    }
+
+    /* A completed task gets crossed out */
+    li.done label {
+      text-decoration: line-through;
+      color: #788078;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>My Daily Routine</h1>
+  <p>Write down your tasks, then tick each one when it’s done.</p>
+
+  <div class="routine-box">
+    <!-- This form lets you add a new task -->
+    <form id="task-form">
+      <input id="task-input" type="text" placeholder="Example: Go for a walk" required>
+      <button type="submit">Add task</button>
+    </form>
+
+    <!-- Tasks will appear in this list -->
+    <ul id="task-list">
+      <li><label><input type="checkbox"> Wake up</label></li>
+      <li><label><input type="checkbox"> Have breakfast</label></li>
+      <li><label><input type="checkbox"> Study or work</label></li>
+      <li><label><input type="checkbox"> Exercise</label></li>
+    </ul>
+
+    <button id="reset-button" type="button">Reset all tasks</button>
+  </div>
+
+  <script>
+    // Find the page elements so JavaScript can work with them
+    const form = document.getElementById("task-form");
+    const input = document.getElementById("task-input");
+    const taskList = document.getElementById("task-list");
+    const resetButton = document.getElementById("reset-button");
+
+    // When the form is submitted, create a new task
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // Stops the page from reloading
+
+      const taskName = input.value.trim();
+
+      // Do nothing if the input is empty
+      if (taskName === "") return;
+
+      // Create a list item with a checkbox and the task name
+      const item = document.createElement("li");
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+
+      checkbox.type = "checkbox";
+      label.appendChild(checkbox);
+      label.append(" " + taskName);
+      item.appendChild(label);
+      taskList.appendChild(item);
+
+      input.value = ""; // Clear the input after adding the task
+    });
+
+    // Cross out a task when its checkbox is ticked
+    taskList.addEventListener("change", function (event) {
+      if (event.target.type === "checkbox") {
+        event.target.closest("li").classList.toggle("done", event.target.checked);
+      }
+    });
+
+    // Uncheck every task when the reset button is clicked
+    resetButton.addEventListener("click", function () {
+      const checkboxes = taskList.querySelectorAll('input[type="checkbox"]');
+
+      checkboxes.forEach(function (checkbox) {
+        checkbox.checked = false;
+        checkbox.closest("li").classList.remove("done");
+      });
+    });
+  </script>
+</body>
+</html>
