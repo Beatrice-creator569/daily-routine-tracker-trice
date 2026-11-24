@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Daily Routine</title>
-
   <style>
-    /* These styles control how the page looks */
     body {
       font-family: Arial, sans-serif;
       background: #f3f6f4;
@@ -16,32 +14,26 @@
       padding: 20px;
     }
 
-    h1 {
-      color: #247a50;
-    }
+    h1 { color: #247a50; }
 
-    .routine-box {
+    .box {
       background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 12px #00000015;
     }
 
-    form {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+    input, button {
+      padding: 10px;
+      margin: 4px 0;
     }
 
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #bbb;
-      border-radius: 6px;
+    input[type="email"], input[type="password"], input[type="text"] {
+      box-sizing: border-box;
+      width: 100%;
     }
 
     button {
-      padding: 10px 14px;
       border: 0;
       border-radius: 6px;
       background: #247a50;
@@ -49,114 +41,196 @@
       cursor: pointer;
     }
 
-    #reset-button {
-      background: #68736c;
-      margin-top: 12px;
-    }
-
-    li {
-      margin: 12px 0;
-    }
-
-    /* A completed task gets crossed out */
-    li.done label {
-      text-decoration: line-through;
-      color: #788078;
-    }
+    li { margin: 12px 0; }
+    li.done label { text-decoration: line-through; color: #788078; }
+    #message { min-height: 1.2em; }
   </style>
 </head>
-
 <body>
   <h1>My Daily Routine</h1>
-  <p>Write down your tasks, then tick each one when it’s done.</p>
 
-  <div class="routine-box">
-    <!-- This form lets you add a new task -->
-    <form id="task-form">
-      <input id="task-input" type="text" placeholder="Example: Go for a walk" required>
-      <button type="submit">Add task</button>
-    </form>
+  <div class="box">
+    <section id="sign-in">
+      <h2>Sign in on your devices</h2>
+      <p>Create one account, then sign in with it on your phone and computer.</p>
 
-    <!-- Tasks will appear in this list -->
-    <ul id="task-list">
-      <li><label><input type="checkbox"> Wake up</label></li>
-      <li><label><input type="checkbox"> Have breakfast</label></li>
-      <li><label><input type="checkbox"> Study or work</label></li>
-      <li><label><input type="checkbox"> Exercise</label></li>
-    </ul>
+      <form id="auth-form">
+        <input id="email" type="email" placeholder="Email address" required>
+        <input id="password" type="password" placeholder="Password (at least 6 characters)" required>
+        <button type="submit">Sign in</button>
+        <button id="create-account" type="button">Create account</button>
+      </form>
+    </section>
 
-    <button id="reset-button" type="button">Reset all tasks</button>
+    <section id="tracker" hidden>
+      <p>Signed in as <span id="user-email"></span></p>
+      <button id="sign-out" type="button">Sign out</button>
+
+      <form id="task-form">
+        <input id="task-input" type="text" placeholder="Add a routine task" required>
+        <button type="submit">Add task</button>
+      </form>
+
+      <ul id="task-list"></ul>
+      <button id="reset-button" type="button">Delete all tasks</button>
+    </section>
+
+    <p id="message" role="status"></p>
   </div>
 
+  <!-- Firebase browser SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <script>
-    // Find the page elements so JavaScript can work with them
-    const form = document.getElementById("task-form");
-    const input = document.getElementById("task-input");
+    // Replace these example values with your Firebase web app configuration.
+    const firebaseConfig = {
+      apiKey: "AIzaSyCKtoMqCDmATWpa7k3sCw95IKBD42cWfcI",
+      authDomain:"daily-routine-tracker-fb6c6.firebaseapp.com",
+      projectId:"daily-routine-tracker-fb6c6",
+      appId:"1:240600529662:web:7b83af24a14dc239f2c3af",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const signInSection = document.getElementById("sign-in");
+    const trackerSection = document.getElementById("tracker");
+    const message = document.getElementById("message");
     const taskList = document.getElementById("task-list");
-    const resetButton = document.getElementById("reset-button");
+    let stopListening = null;
+    let currentTasks = [];
 
-    // When the form is submitted, create a new task
-    form.addEventListener("submit", function (event) {
-      event.preventDefault(); // Stops the page from reloading
+    function showError(error) {
+      message.textContent = error.message;
+    }
 
-      const taskName = input.value.trim();
+    // Create an account once, then use the same email and password on both devices.
+    document.getElementById("create-account").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-      // Do nothing if the input is empty
-      if (taskName === "") return;
-
-      // Create a list item with a checkbox and the task name
-      const item = document.createElement("li");
-      const label = document.createElement("label");
-      const checkbox = document.createElement("input");
-
-      checkbox.type = "checkbox";
-      label.appendChild(checkbox);
-      label.append(" " + taskName);
-      item.appendChild(label);
-      taskList.appendChild(item);
-
-      input.value = ""; // Clear the input after adding the task
-    });
-
-    // Cross out a task when its checkbox is ticked
-    taskList.addEventListener("change", function (event) {
-      if (event.target.type === "checkbox") {
-        event.target.closest("li").classList.toggle("done", event.target.checked);
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        message.textContent = "Account created and signed in.";
+      } catch (error) {
+        showError(error);
       }
     });
 
-    // Uncheck every task when the reset button is clicked
-    resetButton.addEventListener("click", function () {
-      const checkboxes = taskList.querySelectorAll('input[type="checkbox"]');
+    // Sign in to an existing account.
+    document.getElementById("auth-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await auth.signInWithEmailAndPassword(
+          document.getElementById("email").value,
+          document.getElementById("password").value
+        );
+      } catch (error) {
+        showError(error);
+      }
+    });
 
-      checkboxes.forEach(function (checkbox) {
-        checkbox.checked = false;
-        checkbox.closest("li").classList.remove("done");
-      });
+    document.getElementById("sign-out").addEventListener("click", () => auth.signOut());
+
+    // Show the signed-in user's tasks and listen for live database changes.
+    auth.onAuthStateChanged((user) => {
+      if (stopListening) {
+        stopListening();
+        stopListening = null;
+      }
+
+      if (!user) {
+        signInSection.hidden = false;
+        trackerSection.hidden = true;
+        taskList.replaceChildren();
+        message.textContent = "Sign in to see your tasks.";
+        return;
+      }
+
+      signInSection.hidden = true;
+      trackerSection.hidden = false;
+      document.getElementById("user-email").textContent = user.email;
+
+      const tasksRef = db.collection("users").doc(user.uid).collection("tasks");
+
+      stopListening = tasksRef.onSnapshot((snapshot) => {
+        currentTasks = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        renderTasks();
+        message.textContent = "Tasks synced.";
+      }, showError);
+    });
+
+    function renderTasks() {
+      taskList.replaceChildren();
+
+      currentTasks
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+        .forEach((task) => {
+          const item = document.createElement("li");
+          if (task.done) item.classList.add("done");
+
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = Boolean(task.done);
+
+          checkbox.addEventListener("change", async () => {
+            try {
+              await db.collection("users").doc(auth.currentUser.uid)
+                .collection("tasks").doc(task.id)
+                .update({ done: checkbox.checked });
+            } catch (error) {
+              showError(error);
+            }
+          });
+
+          label.append(checkbox, document.createTextNode(" " + task.name));
+          item.appendChild(label);
+          taskList.appendChild(item);
+        });
+    }
+
+    // Add a task to the signed-in user's Firestore collection.
+    document.getElementById("task-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = document.getElementById("task-input");
+      const name = input.value.trim();
+      if (!name || !auth.currentUser) return;
+
+      try {
+        await db.collection("users").doc(auth.currentUser.uid).collection("tasks").add({
+          name,
+          done: false,
+          createdAt: Date.now()
+        });
+        input.value = "";
+        message.textContent = "Task saved.";
+      } catch (error) {
+        showError(error);
+      }
+    });
+
+    // Delete every task belonging to this signed-in user.
+    document.getElementById("reset-button").addEventListener("click", async () => {
+      if (!auth.currentUser) return;
+
+      try {
+        const tasksRef = db.collection("users").doc(auth.currentUser.uid).collection("tasks");
+        const snapshot = await tasksRef.get();
+        const batch = db.batch();
+        snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+      } catch (error) {
+        showError(error);
+      }
     });
   </script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCKtoMqCDmATWpa7k3sCw95IKBD42cWfcI",
-    authDomain: "daily-routine-tracker-fb6c6.firebaseapp.com",
-    projectId: "daily-routine-tracker-fb6c6",
-    storageBucket: "daily-routine-tracker-fb6c6.firebasestorage.app",
-    messagingSenderId: "240600529662",
-    appId: "1:240600529662:web:7b83af24a14dc239f2c3af",
-    measurementId: "G-8HV5CN856W"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
