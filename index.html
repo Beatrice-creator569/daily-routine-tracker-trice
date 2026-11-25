@@ -313,6 +313,18 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    window.addEventListener("error", (event) => {
+  const message = document.getElementById("message");
+  if (message) message.textContent = "Page error: " + event.message;
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const message = document.getElementById("message");
+  if (message) {
+    message.textContent =
+      "Firebase error: " + (event.reason?.message || event.reason);
+  }
+});
 
     const auth = firebase.auth();
     const db = firebase.firestore();
