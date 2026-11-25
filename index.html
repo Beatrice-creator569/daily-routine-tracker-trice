@@ -4,79 +4,297 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Daily Routine</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background: #f3f6f4;
       color: #24332b;
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
+      max-width: 650px;
+      margin: 30px auto;
+      padding: 16px;
     }
 
-    h1 { color: #247a50; }
+    h1, h2 {
+      color: #247a50;
+    }
 
     .box {
       background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px #00000015;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px #00000012;
+    }
+
+    p {
+      line-height: 1.5;
     }
 
     input, button {
-      padding: 10px;
+      min-height: 44px;
+      padding: 10px 12px;
       margin: 4px 0;
+      font: inherit;
     }
 
-    input[type="email"], input[type="password"], input[type="text"] {
-      box-sizing: border-box;
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
       width: 100%;
+      border: 1px solid #aab7ae;
+      border-radius: 6px;
+    }
+
+    input:focus, button:focus-visible {
+      outline: 3px solid #84c69e;
+      outline-offset: 2px;
     }
 
     button {
       border: 0;
-      border-radius: 6px;
+      border-radius: 7px;
       background: #247a50;
       color: white;
       cursor: pointer;
+      font-weight: 600;
     }
 
-    li { margin: 12px 0; }
-    li.done label { text-decoration: line-through; color: #788078; }
-    #message { min-height: 1.2em; }
+    button:hover {
+      filter: brightness(0.93);
+    }
+
+    button.secondary {
+      background: #64736a;
+    }
+
+    button.delete {
+      background: #a33b3b;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    #auth-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    #auth-mode-toggle,
+    #forgot-password {
+      width: 100%;
+    }
+
+    .date-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .date-controls input {
+      grid-column: 1 / -1;
+      width: 100%;
+      border: 1px solid #aab7ae;
+      border-radius: 6px;
+    }
+
+    #selected-date {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 12px 0 4px;
+    }
+
+    #progress {
+      color: #52645a;
+      margin-bottom: 8px;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #e3eae5;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    #progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #247a50;
+      border-radius: inherit;
+      transition: width 250ms ease;
+    }
+
+    #task-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    #task-form input {
+      min-width: 0;
+    }
+
+    #task-form button {
+      margin: 4px 0;
+    }
+
+    #task-list {
+      padding-left: 22px;
+    }
+
+    #task-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    #task-list li label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    #task-list input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      accent-color: #247a50;
+    }
+
+    #task-list li.done label {
+      text-decoration: line-through;
+      color: #788078;
+    }
+
+    #message {
+      min-height: 1.5em;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        margin: 0 auto;
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      .box {
+        padding: 16px;
+      }
+
+      .date-controls {
+        gap: 6px;
+      }
+
+      .date-controls button {
+        padding: 8px 5px;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
+
 <body>
   <h1>My Daily Routine</h1>
 
-  <div class="box">
+  <main class="box">
     <section id="sign-in">
-      <h2>Sign in on your devices</h2>
-      <p>Create one account, then sign in with it on your phone and computer.</p>
+      <h2 id="auth-heading">Welcome back</h2>
+      <p id="auth-help">
+        Sign in to see your routine on all your devices.
+      </p>
 
       <form id="auth-form">
-        <input id="email" type="email" placeholder="Email address" required>
-        <input id="password" type="password" placeholder="Password (at least 6 characters)" required>
-        <button type="submit">Sign in</button>
-        <button id="create-account" type="button">Create account</button>
+        <input
+          id="email"
+          type="email"
+          placeholder="Email address"
+          autocomplete="email"
+          required>
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Password (at least 6 characters)"
+          autocomplete="current-password"
+          minlength="6"
+          required>
+
+        <button id="auth-submit" type="submit">Sign in</button>
       </form>
+
+      <button id="auth-mode-toggle" class="secondary" type="button">
+        Create an account
+      </button>
+
+      <button id="forgot-password" class="secondary" type="button">
+        Forgot password?
+      </button>
     </section>
 
     <section id="tracker" hidden>
-      <p>Signed in as <span id="user-email"></span></p>
-      <button id="sign-out" type="button">Sign out</button>
+      <p>Signed in as <strong id="user-email"></strong></p>
+      <button id="sign-out" class="secondary" type="button">Sign out</button>
+
+      <div class="date-controls">
+        <button id="previous-day" class="secondary" type="button">
+          Previous day
+        </button>
+        <button id="today-button" type="button">Today</button>
+        <button id="next-day" class="secondary" type="button">
+          Next day
+        </button>
+        <input id="date-picker" type="date" aria-label="Choose a date">
+      </div>
+
+      <p id="selected-date"></p>
+      <p id="progress">0 of 0 tasks completed</p>
+
+      <div
+        id="progress-bar"
+        role="progressbar"
+        aria-label="Daily task completion"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0">
+        <div id="progress-fill"></div>
+      </div>
 
       <form id="task-form">
-        <input id="task-input" type="text" placeholder="Add a routine task" required>
+        <input
+          id="task-input"
+          type="text"
+          placeholder="Add a routine task"
+          maxlength="120"
+          required>
         <button type="submit">Add task</button>
       </form>
 
       <ul id="task-list"></ul>
-      <button id="reset-button" type="button">Delete all tasks</button>
+
+      <button id="reset-button" class="secondary" type="button">
+        Reset checks for this day
+      </button>
     </section>
 
-    <p id="message" role="status"></p>
-  </div>
+    <p id="message" role="status" aria-live="polite"></p>
+  </main>
 
   <!-- Firebase browser SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -84,15 +302,18 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // Replace these example values with your Firebase web app configuration.
+    // Replace this example object with the real config from your Firebase web app.
     const firebaseConfig = {
-      apiKey: "AIzaSyCKtoMqCDmATWpa7k3sCw95IKBD42cWfcI",
-      authDomain:"daily-routine-tracker-fb6c6.firebaseapp.com",
-      projectId:"daily-routine-tracker-fb6c6",
+      apiKey:  "AIzaSyCKtoMqCDmATWpa7k3sCw95IKBD42cWfcI",
+      authDomain: "daily-routine-tracker-fb6c6.firebaseapp.com",
+      projectId: "daily-routine-tracker-fb6c6",
+      storageBucket: "daily-routine-tracker-fb6c6.firebasstorage.app",
+      messagingSenderId: "240600529662"
       appId:"1:240600529662:web:7b83af24a14dc239f2c3af",
     };
 
     firebase.initializeApp(firebaseConfig);
+
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -100,42 +321,178 @@
     const trackerSection = document.getElementById("tracker");
     const message = document.getElementById("message");
     const taskList = document.getElementById("task-list");
+    const datePicker = document.getElementById("date-picker");
+    const progress = document.getElementById("progress");
+    const progressBar = document.getElementById("progress-bar");
+    const progressFill = document.getElementById("progress-fill");
+
     let stopListening = null;
     let currentTasks = [];
+    let authMode = "signin";
+    let selectedDate = getTodayKey();
 
-    function showError(error) {
-      message.textContent = error.message;
+    function getTodayKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
     }
 
-    // Create an account once, then use the same email and password on both devices.
-    document.getElementById("create-account").addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    function dateFromKey(dateKey) {
+      const [year, month, day] = dateKey.split("-").map(Number);
+      return new Date(year, month - 1, day, 12);
+    }
 
-      try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        message.textContent = "Account created and signed in.";
-      } catch (error) {
-        showError(error);
+    function showSelectedDate() {
+      datePicker.value = selectedDate;
+
+      const date = dateFromKey(selectedDate);
+      document.getElementById("selected-date").textContent =
+        new Intl.DateTimeFormat(undefined, {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        }).format(date);
+
+      renderTasks();
+    }
+
+    function changeSelectedDate(numberOfDays) {
+      const date = dateFromKey(selectedDate);
+      date.setDate(date.getDate() + numberOfDays);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      selectedDate = `${year}-${month}-${day}`;
+      showSelectedDate();
+    }
+
+    function showError(error) {
+      const friendlyMessages = {
+        "auth/invalid-email": "Please enter a valid email address.",
+        "auth/invalid-credential": "Email or password is incorrect. Check them and try again.",
+        "auth/email-already-in-use": "That email already has an account. Try signing in.",
+        "auth/weak-password": "Choose a stronger password with at least 6 characters.",
+        "auth/too-many-requests": "Too many attempts. Wait a little, then try again.",
+        "auth/network-request-failed": "Network problem. Check your internet connection.",
+        "auth/unauthorized-domain": "This website domain needs to be allowed in Firebase Authentication.",
+        "permission-denied": "Firebase denied access. Check your Firestore security rules."
+      };
+
+      message.textContent =
+        friendlyMessages[error.code] || `Firebase: ${error.message}`;
+    }
+
+    function isTaskDone(task) {
+      if (Array.isArray(task.completedDates)) {
+        return task.completedDates.includes(selectedDate);
       }
+
+      // Older tasks used a single "done" value. Treat that value as today only.
+      return selectedDate === getTodayKey() && Boolean(task.done);
+    }
+
+    function updateAuthModeDisplay() {
+      const signingUp = authMode === "signup";
+
+      document.getElementById("auth-heading").textContent =
+        signingUp ? "Create your account" : "Welcome back";
+
+      document.getElementById("auth-help").textContent =
+        signingUp
+          ? "Use the same account to sign in on your other devices."
+          : "Sign in to see your routine on all your devices.";
+
+      document.getElementById("auth-submit").textContent =
+        signingUp ? "Create account" : "Sign in";
+
+      document.getElementById("auth-mode-toggle").textContent =
+        signingUp ? "I already have an account" : "Create an account";
+
+      document.getElementById("forgot-password").hidden = signingUp;
+
+      document.getElementById("password").autocomplete =
+        signingUp ? "new-password" : "current-password";
+    }
+
+    document.getElementById("auth-mode-toggle").addEventListener("click", () => {
+      authMode = authMode === "signin" ? "signup" : "signin";
+      message.textContent = "";
+      updateAuthModeDisplay();
     });
 
-    // Sign in to an existing account.
     document.getElementById("auth-form").addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const submitButton = document.getElementById("auth-submit");
+
+      submitButton.disabled = true;
+      message.textContent =
+        authMode === "signup" ? "Creating your account…" : "Signing you in…";
+
       try {
-        await auth.signInWithEmailAndPassword(
-          document.getElementById("email").value,
-          document.getElementById("password").value
-        );
+        if (authMode === "signup") {
+          await auth.createUserWithEmailAndPassword(email, password);
+          message.textContent = "Account created. You’re signed in.";
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+          message.textContent = "You’re signed in.";
+        }
+      } catch (error) {
+        showError(error);
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    document.getElementById("forgot-password").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+
+      if (!email) {
+        message.textContent = "Enter your email address first.";
+        document.getElementById("email").focus();
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        message.textContent =
+          "If an account uses that email, a password reset link will be sent.";
       } catch (error) {
         showError(error);
       }
     });
 
-    document.getElementById("sign-out").addEventListener("click", () => auth.signOut());
+    document.getElementById("sign-out").addEventListener("click", () => {
+      auth.signOut().catch(showError);
+    });
 
-    // Show the signed-in user's tasks and listen for live database changes.
+    document.getElementById("previous-day").addEventListener("click", () => {
+      changeSelectedDate(-1);
+    });
+
+    document.getElementById("next-day").addEventListener("click", () => {
+      changeSelectedDate(1);
+    });
+
+    document.getElementById("today-button").addEventListener("click", () => {
+      selectedDate = getTodayKey();
+      showSelectedDate();
+    });
+
+    datePicker.addEventListener("change", () => {
+      if (datePicker.value) {
+        selectedDate = datePicker.value;
+        showSelectedDate();
+      }
+    });
+
     auth.onAuthStateChanged((user) => {
       if (stopListening) {
         stopListening();
@@ -146,6 +503,7 @@
         signInSection.hidden = false;
         trackerSection.hidden = true;
         taskList.replaceChildren();
+        currentTasks = [];
         message.textContent = "Sign in to see your tasks.";
         return;
       }
@@ -153,12 +511,18 @@
       signInSection.hidden = true;
       trackerSection.hidden = false;
       document.getElementById("user-email").textContent = user.email;
+      showSelectedDate();
 
-      const tasksRef = db.collection("users").doc(user.uid).collection("tasks");
+      const tasksRef = db
+        .collection("users")
+        .doc(user.uid)
+        .collection("tasks");
 
+      // Listen for Firestore changes so devices stay in sync.
       stopListening = tasksRef.onSnapshot((snapshot) => {
         currentTasks = snapshot.docs.map((doc) => ({
           id: doc.id,
+          ref: doc.ref,
           ...doc.data()
         }));
 
@@ -168,48 +532,115 @@
     });
 
     function renderTasks() {
+      if (trackerSection.hidden) return;
+
       taskList.replaceChildren();
 
-      currentTasks
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
-        .forEach((task) => {
-          const item = document.createElement("li");
-          if (task.done) item.classList.add("done");
+      const sortedTasks = [...currentTasks].sort(
+        (a, b) => (a.createdAt || 0) - (b.createdAt || 0)
+      );
 
-          const label = document.createElement("label");
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.checked = Boolean(task.done);
+      let completedCount = 0;
 
-          checkbox.addEventListener("change", async () => {
-            try {
-              await db.collection("users").doc(auth.currentUser.uid)
-                .collection("tasks").doc(task.id)
-                .update({ done: checkbox.checked });
-            } catch (error) {
-              showError(error);
+      sortedTasks.forEach((task) => {
+        const done = isTaskDone(task);
+        if (done) completedCount++;
+
+        const item = document.createElement("li");
+        if (done) item.classList.add("done");
+
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = done;
+
+        checkbox.addEventListener("change", async () => {
+          try {
+            const dateChange = checkbox.checked
+              ? firebase.firestore.FieldValue.arrayUnion(selectedDate)
+              : firebase.firestore.FieldValue.arrayRemove(selectedDate);
+
+            const changes = { completedDates: dateChange };
+
+            // Keep today's old "done" value in sync for existing task documents.
+            if (selectedDate === getTodayKey()) {
+              changes.done = checkbox.checked;
             }
-          });
 
-          label.append(checkbox, document.createTextNode(" " + task.name));
-          item.appendChild(label);
-          taskList.appendChild(item);
+            await task.ref.update(changes);
+          } catch (error) {
+            showError(error);
+          }
         });
+
+        label.append(
+          checkbox,
+          document.createTextNode(" " + task.name)
+        );
+        item.appendChild(label);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "delete";
+        deleteButton.textContent = "Delete";
+        deleteButton.setAttribute("aria-label", `Delete ${task.name}`);
+
+        deleteButton.addEventListener("click", async () => {
+          if (!confirm(`Delete "${task.name}" and its completion history?`)) {
+            return;
+          }
+
+          try {
+            await task.ref.delete();
+            message.textContent = "Task deleted.";
+          } catch (error) {
+            showError(error);
+          }
+        });
+
+        item.appendChild(deleteButton);
+        taskList.appendChild(item);
+      });
+
+      if (sortedTasks.length === 0) {
+        const emptyMessage = document.createElement("li");
+        emptyMessage.textContent = "No tasks yet. Add one above to get started.";
+        taskList.appendChild(emptyMessage);
+      }
+
+      const percent = sortedTasks.length
+        ? Math.round((completedCount / sortedTasks.length) * 100)
+        : 0;
+
+      progress.textContent =
+        `${completedCount} of ${sortedTasks.length} tasks completed (${percent}%)`;
+
+      progressFill.style.width = `${percent}%`;
+      progressBar.setAttribute("aria-valuenow", percent);
+
+      document.getElementById("reset-button").disabled =
+        sortedTasks.length === 0;
     }
 
-    // Add a task to the signed-in user's Firestore collection.
     document.getElementById("task-form").addEventListener("submit", async (event) => {
       event.preventDefault();
+
       const input = document.getElementById("task-input");
       const name = input.value.trim();
+
       if (!name || !auth.currentUser) return;
 
       try {
-        await db.collection("users").doc(auth.currentUser.uid).collection("tasks").add({
-          name,
-          done: false,
-          createdAt: Date.now()
-        });
+        await db
+          .collection("users")
+          .doc(auth.currentUser.uid)
+          .collection("tasks")
+          .add({
+            name,
+            completedDates: [],
+            createdAt: Date.now()
+          });
+
         input.value = "";
         message.textContent = "Task saved.";
       } catch (error) {
@@ -217,20 +648,32 @@
       }
     });
 
-    // Delete every task belonging to this signed-in user.
+    // Clear checks for the selected date, keeping tasks and other dates' history.
     document.getElementById("reset-button").addEventListener("click", async () => {
       if (!auth.currentUser) return;
 
       try {
-        const tasksRef = db.collection("users").doc(auth.currentUser.uid).collection("tasks");
-        const snapshot = await tasksRef.get();
-        const batch = db.batch();
-        snapshot.docs.forEach((doc) => batch.delete(doc.ref));
-        await batch.commit();
+        const updates = currentTasks.map((task) => {
+          const changes = {
+            completedDates:
+              firebase.firestore.FieldValue.arrayRemove(selectedDate)
+          };
+
+          if (selectedDate === getTodayKey()) {
+            changes.done = false;
+          }
+
+          return task.ref.update(changes);
+        });
+
+        await Promise.all(updates);
+        message.textContent = "Checks reset for this day.";
       } catch (error) {
         showError(error);
       }
     });
+
+    showSelectedDate();
   </script>
 </body>
 </html>
