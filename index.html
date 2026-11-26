@@ -10,34 +10,34 @@
       box-sizing: border-box;
     }
     :root {
-  --page: #f4f7f2;
-  --card: #ffffff;
-  --text: #20332a;
-  --muted: #64736a;
-  --accent: #287a58;
+  --page: #0a4282;
+  --card: #e26060;
+  --text: #1d96b8;
+  --muted: #c8d969;
+  --accent: #acf3d5;
   --accent-light: #e5f1e9;
-  --border: #dce6de;
-  --danger: #a84242;
+  --border: #f385dd;
+  --danger: #71549f;
 }
 
     body {
       font-family: Arial, sans-serif;
-      background: #f3f6f4;
-      color: #24332b;
+      background: #2a2c2b;
+      color: #9a83cc;
       max-width: 650px;
       margin: 30px auto;
       padding: 16px;
     }
 
     h1, h2 {
-      color: #247a50;
+      color: #897a88;
     }
 
     .box {
-      background: white;
+      background: rgb(96, 93, 93);
       padding: 22px;
       border-radius: 14px;
-      box-shadow: 0 4px 16px #00000012;
+      box-shadow: 0 4px 16px #5e2e2e12;
     }
 
     p {
@@ -55,12 +55,12 @@
     input[type="password"],
     input[type="text"] {
       width: 100%;
-      border: 1px solid #aab7ae;
+      border: 1px solid #d5c696;
       border-radius: 6px;
     }
 
     input:focus, button:focus-visible {
-      outline: 3px solid #84c69e;
+      outline: 3px solid #263859;
       outline-offset: 2px;
     }
 
@@ -286,6 +286,13 @@ button.delete:hover {
         font-size: 0.9rem;
       }
     }
+    .motivation {
+  padding: 12px 14px;
+  background: #e5f1e9;
+  color: #287a58;
+  border-radius: 10px;
+  font-weight: 600;
+}
   </style>
 </head>
 
@@ -354,6 +361,9 @@ button.delete:hover {
         aria-valuenow="0">
         <div id="progress-fill"></div>
       </div>
+      <p id="motivation" class="motivation" aria-live="polite">
+  🌱 A little progress goes a long way.
+</p>
 
       <form id="task-form">
         <input
@@ -374,6 +384,8 @@ button.delete:hover {
 
     <p id="message" role="status" aria-live="polite"></p>
   </main>
+ 
+ 
 
   <!-- Firebase browser SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -448,6 +460,18 @@ window.addEventListener("unhandledrejection", (event) => {
 
       renderTasks();
     }
+    const motivation = document.getElementById("motivation");
+
+if (sortedTasks.length === 0) {
+  motivation.textContent = "🌱 Add a task to get your routine started.";
+} else if (percent === 100) {
+  motivation.textContent = "🎉 Amazing! You finished all your tasks today!";
+} else if (completedCount > 0) {
+  motivation.textContent =
+    `👏 Great start! ${sortedTasks.length - completedCount} task(s) to go.`;
+} else {
+  motivation.textContent = "☀️ Ready when you are—start with one task.";
+}
 
     function changeSelectedDate(numberOfDays) {
       const date = dateFromKey(selectedDate);
