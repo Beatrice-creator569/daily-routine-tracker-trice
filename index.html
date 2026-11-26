@@ -9,15 +9,109 @@
     * {
       box-sizing: border-box;
     }
-    :root {
-  --page: #0a4282;
-  --card: #e26060;
-  --text: #1d96b8;
-  --muted: #c8d969;
-  --accent: #acf3d5;
+   :root {
+  --page: #f4f7f2;
+  --card: #ffffff;
+  --text: #20332a;
+  --muted: #64736a;
+  --accent: #287a58;
   --accent-light: #e5f1e9;
-  --border: #f385dd;
-  --danger: #71549f;
+  --border: #dce6de;
+  --danger: #a84242;
+}
+
+body {
+  max-width: 720px;
+  background: var(--page);
+  color: var(--text);
+}
+
+h1, h2 {
+  color: var(--text);
+}
+
+.box {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #20332a10;
+}
+
+button {
+  min-height: 46px;
+  border-radius: 10px;
+  background: var(--accent);
+}
+
+button.secondary {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.date-controls {
+  gap: 10px;
+}
+
+#selected-date {
+  margin-top: 20px;
+  color: var(--text);
+}
+
+#progress {
+  color: var(--muted);
+}
+
+#progress-bar {
+  height: 12px;
+  background: var(--accent-light);
+  border-radius: 99px;
+}
+
+#progress-fill {
+  background: var(--accent);
+}
+
+#task-list {
+  padding: 0;
+  list-style: none;
+}
+
+#task-list li {
+  min-height: 62px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+#task-list input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--accent);
+}
+
+button.delete {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid #e8caca;
+}
+
+button.delete:hover {
+  background: #fff0f0;
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+  }
+
+  .box {
+    padding: 16px;
+  }
+
+  #task-list li {
+    min-height: 60px;
+  }
 }
 
     body {
@@ -460,7 +554,17 @@ window.addEventListener("unhandledrejection", (event) => {
 
       renderTasks();
     }
-    const motivation = document.getElementById("motivation");
+   const sortedTasks = [...currentTasks].sort(
+  (a, b) => (a.createdAt || 0) - (b.createdAt || 0)
+);
+
+// ...the code that draws the tasks and counts completedCount...
+
+const percent = sortedTasks.length
+  ? Math.round((completedCount / sortedTasks.length) * 100)
+  : 0;
+
+const motivation = document.getElementById("motivation");
 
 if (sortedTasks.length === 0) {
   motivation.textContent = "🌱 Add a task to get your routine started.";
@@ -472,6 +576,13 @@ if (sortedTasks.length === 0) {
 } else {
   motivation.textContent = "☀️ Ready when you are—start with one task.";
 }
+
+progress.textContent =
+  `${completedCount} of ${sortedTasks.length} tasks completed (${percent}%)`;
+
+progressFill.style.width = `${percent}%`;
+progressBar.setAttribute("aria-valuenow", percent);
+
 
     function changeSelectedDate(numberOfDays) {
       const date = dateFromKey(selectedDate);
