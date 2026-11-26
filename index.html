@@ -553,28 +553,23 @@ window.addEventListener("unhandledrejection", (event) => {
         }).format(date);
 
       renderTasks();
-    }
-   const sortedTasks = [...currentTasks].sort(
-  (a, b) => (a.createdAt || 0) - (b.createdAt || 0)
-);
-
-// ...the code that draws the tasks and counts completedCount...
-
-const percent = sortedTasks.length
-  ? Math.round((completedCount / sortedTasks.length) * 100)
-  : 0;
-
-const motivation = document.getElementById("motivation");
-
-if (sortedTasks.length === 0) {
-  motivation.textContent = "🌱 Add a task to get your routine started.";
-} else if (percent === 100) {
-  motivation.textContent = "🎉 Amazing! You finished all your tasks today!";
-} else if (completedCount > 0) {
-  motivation.textContent =
+      const sortedTasks = [...currentTasks].sort(
+        (a,b) => (a.createdAt || 0) - (b.createdAt || 0)
+      );
+      const percent = sortedTasks.length
+      ?math.round((completedcount / sortedTasks.length) * 100)
+      :0
+      const motivation = document.getElementById("motivation");
+      if (sortedTasks.length ===0){
+        motivation.textcontent ="🌱 Add a task to get your routine started.";
+       } else if (percent ===100){
+        motivation.textcontent ="🎉 Amazing! You finished all your tasks today!"
+       }else if (completedcount > 0){
+        
+          motivation.textContent =
     `👏 Great start! ${sortedTasks.length - completedCount} task(s) to go.`;
 } else {
-  motivation.textContent = "☀️ Ready when you are—start with one task.";
+   motivation.textContent = "☀️ Ready when you are—start with one task.";
 }
 
 progress.textContent =
@@ -584,7 +579,10 @@ progressFill.style.width = `${percent}%`;
 progressBar.setAttribute("aria-valuenow", percent);
 
 
-    function changeSelectedDate(numberOfDays) {
+
+      }
+
+      function changeSelectedDate(numberOfDays) {
       const date = dateFromKey(selectedDate);
       date.setDate(date.getDate() + numberOfDays);
 
@@ -888,17 +886,25 @@ progressBar.setAttribute("aria-valuenow", percent);
             changes.done = false;
           }
 
-          return task.ref.update(changes);
-        });
+          
+   
+  
 
-        await Promise.all(updates);
-        message.textContent = "Checks reset for this day.";
-      } catch (error) {
-        showError(error);
-      }
-    });
 
-    showSelectedDate();
-  </script>
-</body>
-</html>
+
+
+
+  
+  
+
+
+
+
+  
+
+  
+
+ 
+
+
+      
